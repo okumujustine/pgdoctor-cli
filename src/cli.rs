@@ -27,17 +27,6 @@ pub fn print_usage() {
     eprintln!("  PGDOCTOR_ENDPOINT  API endpoint URL (required for upload)");
     eprintln!("  PGDOCTOR_TOKEN     API authentication token (required for upload)");
 }
-    eprintln!();
-    eprintln!("Commands:");
-    eprintln!("  snapshot  Collect and print database statistics as JSON");
-    eprintln!("  upload    Collect and upload database statistics to remote endpoint");
-    eprintln!();
-    eprintln!("Environment Variables:");
-    eprintln!("  PGDOCTOR_DSN       PostgreSQL connection string (required)");
-    eprintln!("  PGDOCTOR_LIMIT     Maximum queries to collect (default: 10, max: 200)");
-    eprintln!("  PGDOCTOR_ENDPOINT  API endpoint URL (required for upload)");
-    eprintln!("  PGDOCTOR_TOKEN     API authentication token (required for upload)");
-}
 
 /// Runs the snapshot command.
 pub async fn run_snapshot(cfg: &Config) -> Result<()> {
@@ -57,7 +46,7 @@ pub async fn run_upload(cfg: &Config) -> Result<()> {
     }
 
     let snap = collect(cfg).await?;
-    
+
     let client = UploaderClient::new(cfg.endpoint.clone(), cfg.token.clone())
         .context("failed to create upload client")?;
 
