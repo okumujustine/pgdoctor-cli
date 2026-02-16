@@ -39,10 +39,22 @@ pub async fn run_snapshot(cfg: &Config) -> Result<()> {
 /// Runs the upload command.
 pub async fn run_upload(cfg: &Config) -> Result<()> {
     if cfg.endpoint.is_empty() {
-        anyhow::bail!("PGDOCTOR_ENDPOINT is required for upload");
+        anyhow::bail!(
+            "PGDOCTOR_ENDPOINT environment variable is required for upload.\n\n\
+            Set it in your shell profile (~/.zshrc):\n  \
+            export PGDOCTOR_ENDPOINT=\"https://your-api-endpoint.com\"\n\n\
+            Or create a .env file in your current directory:\n  \
+            PGDOCTOR_ENDPOINT=https://your-api-endpoint.com"
+        );
     }
     if cfg.token.is_empty() {
-        anyhow::bail!("PGDOCTOR_TOKEN is required for upload");
+        anyhow::bail!(
+            "PGDOCTOR_TOKEN environment variable is required for upload.\n\n\
+            Set it in your shell profile (~/.zshrc):\n  \
+            export PGDOCTOR_TOKEN=\"your-api-token\"\n\n\
+            Or create a .env file in your current directory:\n  \
+            PGDOCTOR_TOKEN=your-api-token"
+        );
     }
 
     let snap = collect(cfg).await?;

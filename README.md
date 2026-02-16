@@ -1,4 +1,4 @@
-# pgdoctor (Rust)
+# pgdoctor
 
 A local Postgres diagnostic agent written in Rust.
 
@@ -9,46 +9,127 @@ A local Postgres diagnostic agent written in Rust.
 - Upload snapshots to a remote API endpoint
 - Query normalization and fingerprinting
 
-## Requirements
+## Installation
 
-- Rust 1.80+ (for `LazyLock` support)
-- PostgreSQL with `pg_stat_statements` extension (optional)
-
-## Building
+### macOS (Apple Silicon)
 
 ```bash
-cargo build --release
+# Download the latest release
+curl -LO https://github.com/okumujustine/pgdoctor-cli/releases/latest/download/pgdoctor-macos-arm64.tar.gz
+
+# Extract
+tar -xzf pgdoctor-macos-arm64.tar.gz
+
+# Move to a directory in your PATH
+sudo mv pgdoctor /usr/local/bin/
+
+# Verify installation
+pgdoctor --version
 ```
 
-The binary will be at `target/release/pgdoctor`.
+### Build from Source
+
+Requirements:
+- Rust 1.80+ (for `LazyLock` support)
+
+```bash
+# Clone the repository
+git clone https://github.com/okumujustine/pgdoctor-cli.git
+cd pgdoctor-cli
+
+# Build release binary
+cargo build --release
+
+# Install globally
+cargo install --path .
+
+# Or manually move binary
+sudo mv target/release/pgdoctor /usr/local/bin/
+```
 
 ## Configuration
 
-Set environment variables or create a `.env` file:
+pgdoctor requires environment variables for configuration. You can set them in two ways:
+
+### Option 1: Shell Profile (Recommended for global CLI)
+
+Add to your `~/.zshrc` or `~/.bashrc`:
 
 ```bash
-cp .env.example .env
+export PGDOCTOR_DSN="postgres://username:password@localhost:5432/database_name"
+export PGDOCTOR_ENDPOINT="https://your-api-endpoint.com"
+export PGDOCTOR_TOKEN="your-api-token"
+export PGDOCTOR_LIMIT=20
 ```
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PGDOCTOR_DSN` | PostgreSQL connection string | (required) |
-| `PGDOCTOR_LIMIT` | Max queries to collect (1-200) | 10 |
-| `PGDOCTOR_ENDPOINT` | API endpoint for uploads | (required for upload) |
-| `PGDOCTOR_TOKEN` | API authentication token | (required for upload) |
+Then reload your shell:
+
+```bash
+source ~/.zshrc
+```
+
+### Option 2: `.env` File (Per-project)
+
+Create a `.env` file in the directory where you run pgdoctor:
+
+```bash
+PGDOCTOR_DSN=postgres://username:password@localhost:5432/database_name
+PGDOCTOR_ENDPOINT=https://your-api-endpoint.com
+PGDOCTOR_TOKEN=your-api-token
+PGDOCTOR_LIMIT=20
+```
+
+### Environment Variables Reference
+
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `PGDOCTOR_DSN` | PostgreSQL connection string | Yes | - |
+| `PGDOCTOR_LIMIT` | Max queries to collect (1-200) | No | 10 |
+| `PGDOCTOR_ENDPOINT` | API endpoint for uploads | For `upload` command | - |
+| `PGDOCTOR_TOKEN` | API authentication token | For `upload` command | - |
+
+### PostgreSQL Connection String Format
+
+```
+postgres://[user]:[password]@[host]:[port]/[database]
+```
+
+Examples:
+```bash
+# Local database
+PGDOCTOR_DSN="postgres://postgres:password@localhost:5432/mydb"
+
+# Remote database with SSL
+PGDOCTOR_DSN="postgres://user:pass@db.example.com:5432/mydb?sslmode=require"
+```
+
+## Prerequisites
+
+For full functionality, enable the `pg_stat_statements` extension in PostgreSQL:
+
+```sql
+-- Connect to your database as superuser
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+```
 
 ## Usage
+
+### Check version
+
+```bash
+pgdoctor --version
+```
 
 ### Collect and print snapshot
 
 ```bash
-./pgdoctor snapshot
+pgdoctor snapshot
 ```
 
 ### Collect and upload snapshot
 
 ```bash
-./pgdoctor upload
+pgdoctor upload
 ```
 
 ## Example Output
@@ -73,7 +154,20 @@ cp .env.example .env
 }
 ```
 
+## Troubleshooting
+
+### "PGDOCTOR_DSN is required"
+Make sure you've set the `PGDOCTOR_DSN` environment variable either in your shell profile or in a `.env` file.
+
+### "connection refused"
+Check that PostgreSQL is running and the connection string is correct.
+
+### "pg_stat_statements not found"
+The extension is optional, but to enable it run:
+```sql
+CREATE EXTENSION pg_stat_statements;
+```
+
 ## License
 
 MIT
-# pgdoctor-cli

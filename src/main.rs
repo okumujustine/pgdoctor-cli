@@ -7,7 +7,8 @@ mod cli;
 
 #[tokio::main]
 async fn main() {
-    let _ = dotenvy::dotenv();
+    // .env file overrides shell variables when present (for development)
+    let _ = dotenvy::dotenv_override();
 
     let args: Vec<String> = env::args().collect();
 
